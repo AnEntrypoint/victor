@@ -82,6 +82,48 @@ export class Options {
     /**
      * @returns {number}
      */
+    get refine_gain() {
+        const ret = wasm.__wbg_get_options_refine_gain(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get refine_gradients() {
+        const ret = wasm.__wbg_get_options_refine_gradients(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_iters() {
+        const ret = wasm.__wbg_get_options_refine_iters(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_ms() {
+        const ret = wasm.__wbg_get_options_refine_ms(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get refine_solid() {
+        const ret = wasm.__wbg_get_options_refine_solid(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get refine() {
+        const ret = wasm.__wbg_get_options_refine(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
     get smooth() {
         const ret = wasm.__wbg_get_options_smooth(this.__wbg_ptr);
         return ret >>> 0;
@@ -183,6 +225,42 @@ export class Options {
     /**
      * @param {number} arg0
      */
+    set refine_gain(arg0) {
+        wasm.__wbg_set_options_refine_gain(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {boolean} arg0
+     */
+    set refine_gradients(arg0) {
+        wasm.__wbg_set_options_refine_gradients(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_iters(arg0) {
+        wasm.__wbg_set_options_refine_iters(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_ms(arg0) {
+        wasm.__wbg_set_options_refine_ms(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {boolean} arg0
+     */
+    set refine_solid(arg0) {
+        wasm.__wbg_set_options_refine_solid(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {boolean} arg0
+     */
+    set refine(arg0) {
+        wasm.__wbg_set_options_refine(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
     set smooth(arg0) {
         wasm.__wbg_set_options_smooth(this.__wbg_ptr, arg0);
     }
@@ -240,6 +318,10 @@ function __wbg_get_imports() {
         __proto__: null,
         __wbg___wbindgen_throw_41e9ee4f547fc59a: function(arg0, arg1) {
             throw new Error(getStringFromWasm0(arg0, arg1));
+        },
+        __wbg_now_10dfb829d34c0d52: function() {
+            const ret = performance.now();
+            return ret;
         },
         __wbindgen_init_externref_table: function() {
             const table = wasm.__wbindgen_externrefs;

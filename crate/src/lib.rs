@@ -2,6 +2,8 @@ use visioncortex::color_clusters::{KeyingAction, Runner, RunnerConfig};
 use visioncortex::{Color, ColorImage, CompoundPath, PathSimplifyMode, PointF64};
 use wasm_bindgen::prelude::*;
 
+mod refine;
+
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct Options {
@@ -20,6 +22,12 @@ pub struct Options {
     pub threshold: u8,
     pub gradients: bool,
     pub gradient_gain: f64,
+    pub refine: bool,
+    pub refine_iters: u32,
+    pub refine_ms: f64,
+    pub refine_gradients: bool,
+    pub refine_solid: bool,
+    pub refine_gain: f64,
 }
 
 #[wasm_bindgen]
@@ -42,6 +50,12 @@ impl Options {
             threshold: 128,
             gradients: false,
             gradient_gain: 0.35,
+            refine: false,
+            refine_iters: 120,
+            refine_ms: 1500.0,
+            refine_gradients: true,
+            refine_solid: false,
+            refine_gain: 400.0,
         }
     }
 }
@@ -268,5 +282,8 @@ pub fn vectorize(rgba: &[u8], width: usize, height: usize, o: &Options) -> Strin
         svg.insert_str(at, &format!("<defs>{}</defs>", defs));
     }
     svg.push_str("</svg>");
+    if o.refine && !o.binary && !o.gradients && !has_alpha {
+        svg = refine::run(rgba, width, height, &svg, o);
+    }
     svg
 }

@@ -6,7 +6,8 @@ const FIELDS = {
   binary: "binary", stacked: "stacked", spline: "spline", filterSpeckle: "filter_speckle",
   colorPrecision: "color_precision", layerDifference: "layer_difference", cornerThreshold: "corner_threshold",
   lengthThreshold: "length_threshold", spliceThreshold: "splice_threshold", pathPrecision: "path_precision",
-  smooth: "smooth", threshold: "threshold", gradients: "gradients", gradientGain: "gradient_gain"
+  smooth: "smooth", threshold: "threshold", gradients: "gradients", gradientGain: "gradient_gain",
+  refine: "refine", refineIters: "refine_iters", refineMs: "refine_ms", refineGradients: "refine_gradients", refineSolid: "refine_solid", refineGain: "refine_gain"
 };
 
 self.onmessage = async ({ data }) => {
