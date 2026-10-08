@@ -36,14 +36,17 @@ button.p{background:var(--acc);color:#fff;border:0;margin-top:8px;cursor:pointer
   <p class="sub">Raster → SVG, entirely in your browser. Rust/WASM, no upload.</p>
   <div id="drop">Drop, paste or click to choose an image</div>
   <input id="file" type="file" accept="image/*" hidden>
-  <label>Preset</label>
-  <select id="preset"></select>
-  <div id="ctl"></div>
-  <div class="row"><label><input type="checkbox" id="stacked" checked> stacked layers</label><label><input type="checkbox" id="spline" checked> curves</label></div>
-  <div class="row"><label><input type="checkbox" id="seg"> AI subject separation</label></div>
-  <div class="row"><label><input type="checkbox" id="refine" checked> AI refinement</label></div>
-  <label>Refinement quality</label>
-  <select id="quality"><option value="fast">Fast</option><option value="balanced" selected>Balanced</option><option value="max">Max</option></select>
+  <details id="advanced">
+    <summary>Advanced</summary>
+    <label>Preset</label>
+    <select id="preset"></select>
+    <div id="ctl"></div>
+    <div class="row"><label><input type="checkbox" id="stacked" checked> stacked layers</label><label><input type="checkbox" id="spline" checked> curves</label></div>
+    <div class="row"><label><input type="checkbox" id="seg"> AI subject separation</label></div>
+    <div class="row"><label><input type="checkbox" id="refine" checked> AI refinement</label></div>
+    <label>Refinement quality</label>
+    <select id="quality"><option value="fast">Fast</option><option value="balanced" selected>Balanced</option><option value="max">Max</option></select>
+  </details>
   <button class="p" id="dl" disabled>Download SVG</button>
   <button id="cp" disabled>Copy SVG</button>
 </aside>
