@@ -19,7 +19,7 @@ http.createServer((req, res) => {
   try { if (fs.statSync(f).isDirectory()) f = path.join(f, "index.html"); } catch (e) { res.writeHead(404); return res.end(); }
   fs.readFile(f, (e, d) => {
     if (e) { res.writeHead(404); return res.end(); }
-    res.writeHead(200, { "Content-Type": mime[path.extname(f)] || "application/octet-stream", "Cache-Control": "no-store" });
+    res.writeHead(200, { "Content-Type": mime[path.extname(f)] || "application/octet-stream", "Cache-Control": "no-store", "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Embedder-Policy": "require-corp" });
     res.end(d);
   });
 }).listen(+process.env.PORT || 8765, "127.0.0.1");

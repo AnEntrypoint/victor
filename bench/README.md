@@ -32,3 +32,5 @@ Quality dominates and size is a logarithmic penalty with 100 KB as the reference
 3. Drive it with the gm `cdp` verb, see `run.cdp.txt` (opens `http://127.0.0.1:8765/bench/index.html?save=<tag>`, which runs every corpus image through every pipeline and writes `results/<tag>.json` and `results/<tag>.md`). Query parameters: `pipelines=<module path relative to bench/>`, `names=a,b`, `auto=0` (load only, then call `victorBench.runBench({pipelines, names, ids})` yourself).
 
 Run images in one page sequentially; concurrent browser sessions compete for CPU and inflate `ms`.
+
+Learned-preprocessing candidates live in `neural-pipelines.js` (`pipelines=./neural-pipelines.js`); results in `results/neural.md`. `serve.js` sends COOP/COEP so onnxruntime-web can use wasm threads.
