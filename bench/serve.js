@@ -1,7 +1,7 @@
 const http = require("http"), fs = require("fs"), path = require("path");
 const root = path.resolve(__dirname, "..");
 const mime = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".wasm": "application/wasm", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml", ".md": "text/markdown", ".css": "text/css" };
-const saveDirs = { results: path.join(root, "bench", "results"), corpus: path.join(root, "bench", "corpus") };
+const saveDirs = { results: path.join(root, "bench", "results"), corpus: path.join(root, "bench", "corpus"), logo: path.join(root, "bench", "logo", "results") };
 
 http.createServer((req, res) => {
   const url = new URL(req.url, "http://x");

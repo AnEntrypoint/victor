@@ -1,0 +1,324 @@
+[
+ {
+  "id": "si-github",
+  "kind": "glyph",
+  "origin": "npm simple-icons@16.34.0 icons/github.svg",
+  "licence": "CC0-1.0",
+  "bytes": 822
+ },
+ {
+  "id": "si-python",
+  "kind": "glyph",
+  "origin": "npm simple-icons@16.34.0 icons/python.svg",
+  "licence": "CC0-1.0",
+  "bytes": 1518
+ },
+ {
+  "id": "si-rust",
+  "kind": "glyph",
+  "origin": "npm simple-icons@16.34.0 icons/rust.svg",
+  "licence": "CC0-1.0",
+  "bytes": 4244
+ },
+ {
+  "id": "si-bitcoin",
+  "kind": "glyph",
+  "origin": "npm simple-icons@16.34.0 icons/bitcoin.svg",
+  "licence": "CC0-1.0",
+  "bytes": 908
+ },
+ {
+  "id": "si-signal",
+  "kind": "glyph",
+  "origin": "npm simple-icons@16.34.0 icons/signal.svg",
+  "licence": "CC0-1.0",
+  "bytes": 1645
+ },
+ {
+  "id": "si-firefoxbrowser",
+  "kind": "glyph",
+  "origin": "npm simple-icons@16.34.0 icons/firefoxbrowser.svg",
+  "licence": "CC0-1.0",
+  "bytes": 1471
+ },
+ {
+  "id": "si-hbo",
+  "kind": "text",
+  "origin": "npm simple-icons@16.34.0 icons/hbo.svg",
+  "licence": "CC0-1.0",
+  "bytes": 777
+ },
+ {
+  "id": "si-visa",
+  "kind": "text",
+  "origin": "npm simple-icons@16.34.0 icons/visa.svg",
+  "licence": "CC0-1.0",
+  "bytes": 793
+ },
+ {
+  "id": "md-home",
+  "kind": "glyph",
+  "origin": "npm @material-design-icons/svg@0.14.15 filled/home.svg",
+  "licence": "Apache-2.0",
+  "bytes": 136
+ },
+ {
+  "id": "md-settings",
+  "kind": "glyph",
+  "origin": "npm @material-design-icons/svg@0.14.15 filled/settings.svg",
+  "licence": "Apache-2.0",
+  "bytes": 793
+ },
+ {
+  "id": "md-favorite",
+  "kind": "glyph",
+  "origin": "npm @material-design-icons/svg@0.14.15 filled/favorite.svg",
+  "licence": "Apache-2.0",
+  "bytes": 274
+ },
+ {
+  "id": "md-account_circle",
+  "kind": "glyph",
+  "origin": "npm @material-design-icons/svg@0.14.15 filled/account_circle.svg",
+  "licence": "Apache-2.0",
+  "bytes": 328
+ },
+ {
+  "id": "lucide-heart",
+  "kind": "stroke",
+  "origin": "npm lucide-static@1.53.0 icons/heart.svg",
+  "licence": "ISC",
+  "bytes": 449
+ },
+ {
+  "id": "lucide-camera",
+  "kind": "stroke",
+  "origin": "npm lucide-static@1.53.0 icons/camera.svg",
+  "licence": "ISC",
+  "bytes": 514
+ },
+ {
+  "id": "lucide-rocket",
+  "kind": "stroke",
+  "origin": "npm lucide-static@1.53.0 icons/rocket.svg",
+  "licence": "ISC",
+  "bytes": 606
+ },
+ {
+  "id": "lucide-map-pin",
+  "kind": "stroke",
+  "origin": "npm lucide-static@1.53.0 icons/map-pin.svg",
+  "licence": "ISC",
+  "bytes": 437
+ },
+ {
+  "id": "bi-check-circle-fill",
+  "kind": "glyph",
+  "origin": "npm bootstrap-icons@1.13.2 icons/check-circle-fill.svg",
+  "licence": "MIT",
+  "bytes": 339
+ },
+ {
+  "id": "bi-bootstrap-fill",
+  "kind": "glyph",
+  "origin": "npm bootstrap-icons@1.13.2 icons/bootstrap-fill.svg",
+  "licence": "MIT",
+  "bytes": 545
+ },
+ {
+  "id": "bi-calendar3",
+  "kind": "glyph",
+  "origin": "npm bootstrap-icons@1.13.2 icons/calendar3.svg",
+  "licence": "MIT",
+  "bytes": 666
+ },
+ {
+  "id": "bi-emoji-smile",
+  "kind": "glyph",
+  "origin": "npm bootstrap-icons@1.13.2 icons/emoji-smile.svg",
+  "licence": "MIT",
+  "bytes": 525
+ },
+ {
+  "id": "tabler-alarm",
+  "kind": "stroke",
+  "origin": "npm @tabler/icons@3.49.0 icons/outline/alarm.svg",
+  "licence": "MIT",
+  "bytes": 466
+ },
+ {
+  "id": "tabler-chart-pie",
+  "kind": "stroke",
+  "origin": "npm @tabler/icons@3.49.0 icons/outline/chart-pie.svg",
+  "licence": "MIT",
+  "bytes": 501
+ },
+ {
+  "id": "tabler-cpu",
+  "kind": "stroke",
+  "origin": "npm @tabler/icons@3.49.0 icons/outline/cpu.svg",
+  "licence": "MIT",
+  "bytes": 646
+ },
+ {
+  "id": "twemoji-rocket",
+  "kind": "flat-multi",
+  "origin": "github jdecked/twemoji assets/svg/1f680.svg",
+  "licence": "CC-BY-4.0 (c) Twitter, Inc and other contributors; attribution required",
+  "bytes": 677
+ },
+ {
+  "id": "twemoji-apple",
+  "kind": "flat-multi",
+  "origin": "github jdecked/twemoji assets/svg/1f34e.svg",
+  "licence": "CC-BY-4.0 (c) Twitter, Inc and other contributors; attribution required",
+  "bytes": 446
+ },
+ {
+  "id": "twemoji-rainbow",
+  "kind": "flat-multi",
+  "origin": "github jdecked/twemoji assets/svg/1f308.svg",
+  "licence": "CC-BY-4.0 (c) Twitter, Inc and other contributors; attribution required",
+  "bytes": 733
+ },
+ {
+  "id": "twemoji-cat",
+  "kind": "flat-multi",
+  "origin": "github jdecked/twemoji assets/svg/1f431.svg",
+  "licence": "CC-BY-4.0 (c) Twitter, Inc and other contributors; attribution required",
+  "bytes": 3340
+ },
+ {
+  "id": "twemoji-heart",
+  "kind": "glyph",
+  "origin": "github jdecked/twemoji assets/svg/2764.svg",
+  "licence": "CC-BY-4.0 (c) Twitter, Inc and other contributors; attribution required",
+  "bytes": 368
+ },
+ {
+  "id": "wm-tango-style-wikipedia-selection-icon",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Tango_style_Wikipedia_Selection_Icon.svg",
+  "licence": "CC0",
+  "bytes": 3184
+ },
+ {
+  "id": "wm-tango-style-mushroom-icon",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Tango_Style_Mushroom_icon.svg",
+  "licence": "CC0",
+  "bytes": 5930
+ },
+ {
+  "id": "wm-tango-style-wikimedia-icon-no-shadow",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Tango_style_Wikimedia_Icon_no_shadow.svg",
+  "licence": "Public domain",
+  "bytes": 3027
+ },
+ {
+  "id": "wm-blue-round-button",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Blue_round_button.svg",
+  "licence": "CC0",
+  "bytes": 725
+ },
+ {
+  "id": "wm-telegram-2019-logo-old-gradient-version",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Telegram_2019_Logo_(old_gradient_version).svg",
+  "licence": "Public domain",
+  "bytes": 604
+ },
+ {
+  "id": "wm-groupme-gradient-logo",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:GroupMe_gradient_logo.svg",
+  "licence": "Public domain",
+  "bytes": 1686
+ },
+ {
+  "id": "wm-cosmic-logo-neutral-gradient-mark",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Cosmic_logo_neutral_%2B_gradient_mark.svg",
+  "licence": "Public domain",
+  "bytes": 4842
+ },
+ {
+  "id": "wm-avid-gradient-logo-without-tm",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Avid_Gradient_logo_without_TM.svg",
+  "licence": "Public domain",
+  "bytes": 5606
+ },
+ {
+  "id": "wm-android-logo-2019-2023",
+  "kind": "glyph",
+  "origin": "https://commons.wikimedia.org/wiki/File:Android_logo_(2019-2023).svg",
+  "licence": "Public domain",
+  "bytes": 2102
+ },
+ {
+  "id": "wm-windows-11-start-button-icon",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Windows_11_start_button_icon.svg",
+  "licence": "Public domain",
+  "bytes": 4614
+ },
+ {
+  "id": "wm-youtube-logo-2013-2017",
+  "kind": "flat-multi",
+  "origin": "https://commons.wikimedia.org/wiki/File:YouTube_Logo_(2013-2017).svg",
+  "licence": "Public domain",
+  "bytes": 1934
+ },
+ {
+  "id": "wm-buick-text-logo",
+  "kind": "text",
+  "origin": "https://commons.wikimedia.org/wiki/File:Buick_Text_logo.svg",
+  "licence": "Public domain",
+  "bytes": 2744
+ },
+ {
+  "id": "wm-wordmark-le-coq-sportif",
+  "kind": "text",
+  "origin": "https://commons.wikimedia.org/wiki/File:Wordmark_Le_Coq_Sportif.svg",
+  "licence": "Public domain",
+  "bytes": 2033
+ },
+ {
+  "id": "wm-letterboxd-logo-h-pos-rgb",
+  "kind": "text",
+  "origin": "https://commons.wikimedia.org/wiki/File:Letterboxd-Logo-H-Pos-RGB.svg",
+  "licence": "Public domain",
+  "bytes": 5742
+ },
+ {
+  "id": "wm-windows-logo-and-wordmark-2012-2015",
+  "kind": "text",
+  "origin": "https://commons.wikimedia.org/wiki/File:Windows_logo_and_wordmark_-_2012%E2%80%932015.svg",
+  "licence": "Public domain",
+  "bytes": 4668
+ },
+ {
+  "id": "wm-flag-of-turkey",
+  "kind": "flat-multi",
+  "origin": "https://commons.wikimedia.org/wiki/File:Flag_of_Turkey.svg",
+  "licence": "Public domain",
+  "bytes": 324
+ },
+ {
+  "id": "wm-flag-of-quebec",
+  "kind": "flat-multi",
+  "origin": "https://commons.wikimedia.org/wiki/File:Flag_of_Quebec.svg",
+  "licence": "Public domain",
+  "bytes": 835
+ },
+ {
+  "id": "wm-shutdown-button",
+  "kind": "gradient",
+  "origin": "https://commons.wikimedia.org/wiki/File:Shutdown_button.svg",
+  "licence": "Public domain",
+  "bytes": 2078
+ }
+]

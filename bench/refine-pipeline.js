@@ -28,7 +28,7 @@ const bases = new Map();
 globalThis.refineMs = {};
 
 async function base(image) {
-  const key = image.width + "x" + image.height + ":" + image.data.slice(0, 4096).reduce((a, b) => (a * 31 + b) >>> 0, 7);
+  const key = image.width + "x" + image.height + ":" + image.data.reduce((a, b, i) => (i % 5 ? a : Math.imul(a ^ b, 16777619) >>> 0), 2166136261);
   if (!bases.has(key)) {
     const t0 = performance.now();
     const bmp = await createImageBitmap(image);

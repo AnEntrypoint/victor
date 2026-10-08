@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>victor logo bench</title>
+<pre id="out">loading</pre>
+<script type="module">
+import { runLogoBench, save } from "./run.js";
+const out = document.getElementById("out");
+const q = new URLSearchParams(location.search);
+const list = k => (q.get(k) ? q.get(k).split(",") : undefined);
+const records = await runLogoBench({
+  pipelines: q.get("pipelines") || "./baselines.js",
+  names: list("names"),
+  items: list("items"),
+  sizes: list("sizes")?.map(Number),
+  variants: list("variants"),
+  onProgress: s => { out.textContent = s; }
+});
+window.logoResult = records;
+try { if (q.get("tag")) await save(`raw-${q.get("tag")}.json`, JSON.stringify(records)); } catch (e) { window.__err = String(e); }
+out.textContent = "done " + records.length;
+window.logoDone = true;
+</script>
