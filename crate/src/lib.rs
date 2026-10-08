@@ -28,6 +28,16 @@ pub struct Options {
     pub refine_gradients: bool,
     pub refine_solid: bool,
     pub refine_gain: f64,
+    pub refine_shape: bool,
+    pub refine_shape_iters: u32,
+    pub refine_edge: f64,
+    pub refine_prune: f64,
+    pub refine_dens: f64,
+    pub refine_precision: u32,
+    pub refine_levels: u32,
+    pub refine_lr: f64,
+    pub refine_cap: f64,
+    pub refine_dead: f64,
 }
 
 #[wasm_bindgen]
@@ -52,10 +62,20 @@ impl Options {
             gradient_gain: 0.35,
             refine: false,
             refine_iters: 120,
-            refine_ms: 1500.0,
+            refine_ms: 2500.0,
             refine_gradients: true,
             refine_solid: false,
             refine_gain: 400.0,
+            refine_shape: true,
+            refine_shape_iters: 12,
+            refine_edge: 60.0,
+            refine_prune: 0.0,
+            refine_dens: 0.0,
+            refine_precision: 1,
+            refine_levels: 1,
+            refine_lr: 0.2,
+            refine_cap: 1.5,
+            refine_dead: 0.5,
         }
     }
 }
@@ -286,4 +306,9 @@ pub fn vectorize(rgba: &[u8], width: usize, height: usize, o: &Options) -> Strin
         svg = refine::run(rgba, width, height, &svg, o);
     }
     svg
+}
+
+#[wasm_bindgen]
+pub fn refine_svg(rgba: &[u8], width: usize, height: usize, svg: &str, o: &Options) -> String {
+    refine::run(rgba, width, height, svg, o)
 }

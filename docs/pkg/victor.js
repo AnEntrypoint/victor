@@ -82,6 +82,34 @@ export class Options {
     /**
      * @returns {number}
      */
+    get refine_cap() {
+        const ret = wasm.__wbg_get_options_refine_cap(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_dead() {
+        const ret = wasm.__wbg_get_options_refine_dead(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_dens() {
+        const ret = wasm.__wbg_get_options_refine_dens(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_edge() {
+        const ret = wasm.__wbg_get_options_refine_edge(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
     get refine_gain() {
         const ret = wasm.__wbg_get_options_refine_gain(this.__wbg_ptr);
         return ret;
@@ -103,9 +131,51 @@ export class Options {
     /**
      * @returns {number}
      */
+    get refine_levels() {
+        const ret = wasm.__wbg_get_options_refine_levels(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_lr() {
+        const ret = wasm.__wbg_get_options_refine_lr(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
     get refine_ms() {
         const ret = wasm.__wbg_get_options_refine_ms(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_precision() {
+        const ret = wasm.__wbg_get_options_refine_precision(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_prune() {
+        const ret = wasm.__wbg_get_options_refine_prune(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get refine_shape_iters() {
+        const ret = wasm.__wbg_get_options_refine_shape_iters(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get refine_shape() {
+        const ret = wasm.__wbg_get_options_refine_shape(this.__wbg_ptr);
+        return ret !== 0;
     }
     /**
      * @returns {boolean}
@@ -225,6 +295,30 @@ export class Options {
     /**
      * @param {number} arg0
      */
+    set refine_cap(arg0) {
+        wasm.__wbg_set_options_refine_cap(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_dead(arg0) {
+        wasm.__wbg_set_options_refine_dead(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_dens(arg0) {
+        wasm.__wbg_set_options_refine_dens(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_edge(arg0) {
+        wasm.__wbg_set_options_refine_edge(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
     set refine_gain(arg0) {
         wasm.__wbg_set_options_refine_gain(this.__wbg_ptr, arg0);
     }
@@ -243,8 +337,44 @@ export class Options {
     /**
      * @param {number} arg0
      */
+    set refine_levels(arg0) {
+        wasm.__wbg_set_options_refine_levels(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_lr(arg0) {
+        wasm.__wbg_set_options_refine_lr(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
     set refine_ms(arg0) {
         wasm.__wbg_set_options_refine_ms(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_precision(arg0) {
+        wasm.__wbg_set_options_refine_precision(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_prune(arg0) {
+        wasm.__wbg_set_options_refine_prune(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_shape_iters(arg0) {
+        wasm.__wbg_set_options_refine_shape_iters(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {boolean} arg0
+     */
+    set refine_shape(arg0) {
+        wasm.__wbg_set_options_refine_shape(this.__wbg_ptr, arg0);
     }
     /**
      * @param {boolean} arg0
@@ -290,6 +420,32 @@ export class Options {
     }
 }
 if (Symbol.dispose) Options.prototype[Symbol.dispose] = Options.prototype.free;
+
+/**
+ * @param {Uint8Array} rgba
+ * @param {number} width
+ * @param {number} height
+ * @param {string} svg
+ * @param {Options} o
+ * @returns {string}
+ */
+export function refine_svg(rgba, width, height, svg, o) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passArray8ToWasm0(rgba, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(svg, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        _assertClass(o, Options);
+        const ret = wasm.refine_svg(ptr0, len0, width, height, ptr1, len1, o.__wbg_ptr);
+        deferred3_0 = ret[0];
+        deferred3_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
 
 /**
  * @param {Uint8Array} rgba
@@ -368,6 +524,43 @@ function passArray8ToWasm0(arg, malloc) {
     return ptr;
 }
 
+function passStringToWasm0(arg, malloc, realloc) {
+    if (realloc === undefined) {
+        const buf = cachedTextEncoder.encode(arg);
+        const ptr = malloc(buf.length, 1) >>> 0;
+        getUint8ArrayMemory0().subarray(ptr, ptr + buf.length).set(buf);
+        WASM_VECTOR_LEN = buf.length;
+        return ptr;
+    }
+
+    let len = arg.length;
+    let ptr = malloc(len, 1) >>> 0;
+
+    const mem = getUint8ArrayMemory0();
+
+    let offset = 0;
+
+    for (; offset < len; offset++) {
+        const code = arg.charCodeAt(offset);
+        if (code > 0x7F) break;
+        mem[ptr + offset] = code;
+    }
+    if (offset !== len) {
+        if (offset !== 0) {
+            arg = arg.slice(offset);
+        }
+        ptr = realloc(ptr, len, len = offset + arg.length * 3, 1) >>> 0;
+        const view = getUint8ArrayMemory0().subarray(ptr + offset, ptr + len);
+        const ret = cachedTextEncoder.encodeInto(arg, view);
+
+        offset += ret.written;
+        ptr = realloc(ptr, len, offset, 1) >>> 0;
+    }
+
+    WASM_VECTOR_LEN = offset;
+    return ptr;
+}
+
 let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 cachedTextDecoder.decode();
 const MAX_SAFARI_DECODE_BYTES = 2146435072;
@@ -380,6 +573,19 @@ function decodeText(ptr, len) {
         numBytesDecoded = len;
     }
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+}
+
+const cachedTextEncoder = new TextEncoder();
+
+if (!('encodeInto' in cachedTextEncoder)) {
+    cachedTextEncoder.encodeInto = function (arg, view) {
+        const buf = cachedTextEncoder.encode(arg);
+        view.set(buf);
+        return {
+            read: arg.length,
+            written: buf.length
+        };
+    };
 }
 
 let WASM_VECTOR_LEN = 0;
