@@ -18,6 +18,8 @@ pub struct Options {
     pub path_precision: u32,
     pub smooth: u32,
     pub threshold: u8,
+    pub gradients: bool,
+    pub gradient_gain: f64,
 }
 
 #[wasm_bindgen]
@@ -38,6 +40,8 @@ impl Options {
             path_precision: 2,
             smooth: 1,
             threshold: 128,
+            gradients: false,
+            gradient_gain: 0.35,
         }
     }
 }
@@ -86,15 +90,107 @@ fn bilateral(img: &mut ColorImage, passes: u32) {
     }
 }
 
-fn emit(out: &mut String, paths: &CompoundPath, color: Color, o: &Options) -> bool {
+fn hex(c: Color) -> String {
+    format!("#{:02x}{:02x}{:02x}", c.r, c.g, c.b)
+}
+
+fn fit_gradient(src: &[u8], w: usize, idx: &[u32], gain_min: f64) -> Option<([f64; 4], Color, Color)> {
+    let n = idx.len() as f64;
+    if idx.len() < 96 {
+        return None;
+    }
+    let (mut mx, mut my, mut mc) = (0.0, 0.0, [0.0f64; 3]);
+    for &i in idx {
+        let (x, y) = ((i as usize % w) as f64, (i as usize / w) as f64);
+        mx += x;
+        my += y;
+        for c in 0..3 {
+            mc[c] += src[i as usize * 4 + c] as f64;
+        }
+    }
+    mx /= n;
+    my /= n;
+    for c in 0..3 {
+        mc[c] /= n;
+    }
+    let (mut sxx, mut sxy, mut syy, mut sxc, mut syc, mut vc) = (0.0, 0.0, 0.0, [0.0f64; 3], [0.0f64; 3], [0.0f64; 3]);
+    for &i in idx {
+        let (x, y) = ((i as usize % w) as f64 - mx, (i as usize / w) as f64 - my);
+        sxx += x * x;
+        sxy += x * y;
+        syy += y * y;
+        for c in 0..3 {
+            let v = src[i as usize * 4 + c] as f64 - mc[c];
+            sxc[c] += x * v;
+            syc[c] += y * v;
+            vc[c] += v * v;
+        }
+    }
+    let det = sxx * syy - sxy * sxy;
+    if det.abs() < 1e-6 * (sxx * syy).max(1.0) {
+        return None;
+    }
+    let (mut a, mut b, mut cc) = (0.0, 0.0, 0.0);
+    for c in 0..3 {
+        let gx = (syy * sxc[c] - sxy * syc[c]) / det;
+        let gy = (sxx * syc[c] - sxy * sxc[c]) / det;
+        a += gx * gx;
+        b += gx * gy;
+        cc += gy * gy;
+    }
+    let tr = a + cc;
+    let disc = ((a - cc) * (a - cc) / 4.0 + b * b).sqrt();
+    let l1 = tr / 2.0 + disc;
+    let (mut dx, mut dy) = if b.abs() > 1e-12 { (l1 - cc, b) } else if a >= cc { (1.0, 0.0) } else { (0.0, 1.0) };
+    let len = (dx * dx + dy * dy).sqrt();
+    if len < 1e-12 {
+        return None;
+    }
+    dx /= len;
+    dy /= len;
+    let (mut vt, mut ct, mut tmin, mut tmax) = (0.0, [0.0f64; 3], f64::MAX, f64::MIN);
+    for &i in idx {
+        let (x, y) = ((i as usize % w) as f64 - mx, (i as usize / w) as f64 - my);
+        let t = x * dx + y * dy;
+        vt += t * t;
+        tmin = tmin.min(t);
+        tmax = tmax.max(t);
+        for c in 0..3 {
+            ct[c] += t * (src[i as usize * 4 + c] as f64 - mc[c]);
+        }
+    }
+    if vt < 1e-9 {
+        return None;
+    }
+    let total: f64 = vc.iter().sum();
+    let explained: f64 = ct.iter().map(|v| v * v / vt).sum();
+    if total < 1e-9 || explained / total < gain_min || (explained / n / 3.0).sqrt() < 2.0 {
+        return None;
+    }
+    let at = |t: f64| {
+        let f = |c: usize| (mc[c] + ct[c] / vt * t).round().clamp(0.0, 255.0) as u8;
+        Color::new(f(0), f(1), f(2))
+    };
+    Some(([mx + 0.5 + dx * tmin, my + 0.5 + dy * tmin, mx + 0.5 + dx * tmax, my + 0.5 + dy * tmax], at(tmin), at(tmax)))
+}
+
+fn emit(out: &mut String, defs: &mut String, paths: &CompoundPath, fill: Result<Color, ([f64; 4], Color, Color)>, o: &Options) -> bool {
     let (d, off) = paths.to_svg_string(true, PointF64::default(), Some(o.path_precision));
     if d.is_empty() {
         return false;
     }
-    out.push_str(&format!(
-        "<path d=\"{}\" fill=\"#{:02x}{:02x}{:02x}\" transform=\"translate({},{})\"/>",
-        d, color.r, color.g, color.b, off.x, off.y
-    ));
+    let paint = match fill {
+        Ok(c) => hex(c),
+        Err((g, c1, c2)) => {
+            let id = defs.matches("<linearGradient").count();
+            defs.push_str(&format!(
+                "<linearGradient id=\"g{}\" gradientUnits=\"userSpaceOnUse\" x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\"><stop stop-color=\"{}\"/><stop offset=\"1\" stop-color=\"{}\"/></linearGradient>",
+                id, g[0] - off.x, g[1] - off.y, g[2] - off.x, g[3] - off.y, hex(c1), hex(c2)
+            ));
+            format!("url(#g{})", id)
+        }
+    };
+    out.push_str(&format!("<path d=\"{}\" fill=\"{}\" transform=\"translate({},{})\"/>", d, paint, off.x, off.y));
     true
 }
 
@@ -111,13 +207,14 @@ pub fn vectorize(rgba: &[u8], width: usize, height: usize, o: &Options) -> Strin
         h = height
     );
     let has_alpha = img.pixels.chunks_exact(4).any(|p| p[3] < 128);
+    let mut defs = String::new();
     if o.binary {
         let bin = img.to_binary_image(|c| {
             c.a >= 128 && ((c.r as u32 * 299 + c.g as u32 * 587 + c.b as u32 * 114) / 1000) < o.threshold as u32
         });
         for cl in bin.to_clusters(false).iter() {
             let p = cl.to_compound_path(mode, o.corner_threshold.to_radians(), o.length_threshold, o.max_iterations, o.splice_threshold.to_radians());
-            emit(&mut svg, &p, Color::new(0, 0, 0), o);
+            emit(&mut svg, &mut defs, &p, Ok(Color::new(0, 0, 0)), o);
         }
     } else {
         let mut key = Color::default();
@@ -136,6 +233,7 @@ pub fn vectorize(rgba: &[u8], width: usize, height: usize, o: &Options) -> Strin
                 p[3] = 255;
             }
         }
+        let src = img.pixels.clone();
         let cfg = RunnerConfig {
             diagonal: false,
             hierarchical: if o.stacked { visioncortex::color_clusters::HIERARCHICAL_MAX } else { 1 },
@@ -154,8 +252,20 @@ pub fn vectorize(rgba: &[u8], width: usize, height: usize, o: &Options) -> Strin
         for &i in view.clusters_output.iter().rev() {
             let cl = view.get_cluster(i);
             let p = cl.to_compound_path(&view, !o.stacked, mode, o.corner_threshold.to_radians(), o.length_threshold, o.max_iterations, o.splice_threshold.to_radians());
-            emit(&mut svg, &p, cl.residue_color(), o);
+            let fill = if o.gradients {
+                match fit_gradient(&src, width, &cl.indices, o.gradient_gain) {
+                    Some(g) => Err(g),
+                    None => Ok(cl.residue_color()),
+                }
+            } else {
+                Ok(cl.residue_color())
+            };
+            emit(&mut svg, &mut defs, &p, fill, o);
         }
+    }
+    if !defs.is_empty() {
+        let at = svg.find('>').unwrap() + 1;
+        svg.insert_str(at, &format!("<defs>{}</defs>", defs));
     }
     svg.push_str("</svg>");
     svg

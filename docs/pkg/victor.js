@@ -40,6 +40,20 @@ export class Options {
     /**
      * @returns {number}
      */
+    get gradient_gain() {
+        const ret = wasm.__wbg_get_options_gradient_gain(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get gradients() {
+        const ret = wasm.__wbg_get_options_gradients(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
     get layer_difference() {
         const ret = wasm.__wbg_get_options_layer_difference(this.__wbg_ptr);
         return ret;
@@ -129,6 +143,18 @@ export class Options {
      */
     set filter_speckle(arg0) {
         wasm.__wbg_set_options_filter_speckle(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set gradient_gain(arg0) {
+        wasm.__wbg_set_options_gradient_gain(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {boolean} arg0
+     */
+    set gradients(arg0) {
+        wasm.__wbg_set_options_gradients(this.__wbg_ptr, arg0);
     }
     /**
      * @param {number} arg0
