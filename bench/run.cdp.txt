@@ -1,0 +1,6 @@
+sessionId=bench
+url=http://127.0.0.1:8765/bench/index.html?save=baseline
+timeout=600000
+while (!window.benchDone) await new Promise(r => setTimeout(r, 1000));
+const r = window.benchResult;
+return { means: Object.fromEntries(Object.entries(r.pipelines).map(([k, v]) => [k, v.mean])), best: r.bestOfPresets };

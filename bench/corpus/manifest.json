@@ -1,0 +1,15 @@
+[
+{"id":"logo-bitcoin","file":"logo-bitcoin.png","kind":"logo"},
+{"id":"logo-brazil-flag","file":"logo-brazil-flag.png","kind":"logo"},
+{"id":"line-animal","file":"line-animal.jpg","kind":"lineart"},
+{"id":"line-heron","file":"line-heron.jpg","kind":"lineart"},
+{"id":"illus-kawa","file":"illus-kawa.png","kind":"illustration"},
+{"id":"illus-kare","file":"illus-kare.png","kind":"illustration"},
+{"id":"tex-granite","file":"tex-granite.jpg","kind":"texture"},
+{"id":"tex-sand","file":"tex-sand.jpg","kind":"texture"},
+{"id":"photo-curtis","file":"photo-curtis.jpg","kind":"photo"},
+{"id":"photo-building","file":"photo-building.jpg","kind":"photo"},
+{"id":"photo-fema","file":"photo-fema.jpg","kind":"photo"},
+{"id":"alpha-gear","file":"alpha-gear.png","kind":"transparent"},
+{"id":"lowq-fema","file":"lowq-fema.jpg","kind":"lowq-jpeg"}
+]

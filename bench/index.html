@@ -1,0 +1,28 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>victor bench</title>
+<pre id="out">loading</pre>
+<script type="module">
+import "./bench.js";
+const out = document.getElementById("out");
+const q = new URLSearchParams(location.search);
+if (q.get("auto") === "0") {
+  out.textContent = "ready";
+} else {
+  const names = q.get("names") ? q.get("names").split(",") : undefined;
+  const res = await victorBench.runBench({
+    pipelines: q.get("pipelines") || "./pipelines.js",
+    names,
+    onProgress: (n, id) => { out.textContent = n + " " + id; }
+  });
+  const md = victorBench.toMarkdown(res);
+  out.textContent = md;
+  window.benchResult = res;
+  const tag = q.get("save");
+  if (tag) {
+    await victorBench.save("results", tag + ".json", JSON.stringify(res, null, 1));
+    await victorBench.save("results", tag + ".md", md);
+  }
+  window.benchDone = true;
+}
+</script>
