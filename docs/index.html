@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Victor Vectorizer</title>
+<style>
+:root{--bg:#f6f6f4;--fg:#1b1b1b;--card:#fff;--line:#d8d8d2;--acc:#2b59ff;--mut:#666}
+@media (prefers-color-scheme:dark){:root{--bg:#141414;--fg:#eee;--card:#1e1e1e;--line:#333;--acc:#7b97ff;--mut:#999}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif;display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+aside{padding:16px;border-right:1px solid var(--line);background:var(--card);overflow:auto;max-height:100vh}
+main{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+h1{font-size:18px;margin:0 0 4px}
+p.sub{color:var(--mut);margin:0 0 12px;font-size:12px}
+label{display:block;margin:10px 0 2px;font-size:12px;color:var(--mut)}
+label b{color:var(--fg);float:right;font-weight:500}
+input[type=range]{width:100%}
+select,button{width:100%;padding:7px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit}
+button.p{background:var(--acc);color:#fff;border:0;margin-top:8px;cursor:pointer}
+.row{display:flex;gap:8px;align-items:center}
+.row label{margin:10px 0 0}
+#drop{border:2px dashed var(--line);border-radius:10px;padding:28px;text-align:center;color:var(--mut);cursor:pointer}
+#drop.over{border-color:var(--acc)}
+#view{position:relative;flex:1;min-height:360px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:repeating-conic-gradient(#8881 0 25%,transparent 0 50%) 0/20px 20px;touch-action:none}
+#view>*{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+#svgwrap{clip-path:inset(0 0 0 50%)}
+#bar{position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--acc);cursor:ew-resize;z-index:2}
+#stat{font-size:12px;color:var(--mut)}
+@media(max-width:760px){body{grid-template-columns:1fr}aside{max-height:none;border:0}}
+</style>
+</head>
+<body>
+<aside>
+  <h1>Victor</h1>
+  <p class="sub">Raster → SVG, entirely in your browser. Rust/WASM, no upload.</p>
+  <div id="drop">Drop, paste or click to choose an image</div>
+  <input id="file" type="file" accept="image/*" hidden>
+  <label>Preset</label>
+  <select id="preset">
+    <option value="photo">Photo</option>
+    <option value="illustration" selected>Illustration / logo</option>
+    <option value="lineart">Line art (B&amp;W)</option>
+    <option value="pixel">Pixel art</option>
+  </select>
+  <div id="ctl"></div>
+  <div class="row"><label><input type="checkbox" id="stacked" checked> stacked layers</label><label><input type="checkbox" id="spline" checked> curves</label></div>
+  <button class="p" id="dl" disabled>Download SVG</button>
+  <button id="cp" disabled>Copy SVG</button>
+</aside>
+<main>
+  <div id="view"><img id="src" alt=""><div id="svgwrap"></div><div id="bar"></div></div>
+  <div id="stat">No image loaded.</div>
+</main>
+<script type="module">
+const $ = s => document.querySelector(s);
+const CTL = [
+  ["maxdim","Max dimension px",256,4096,64,2048],
+  ["smooth","Denoise passes",0,4,1,1],
+  ["colorPrecision","Color precision",1,8,1,6],
+  ["layerDifference","Layer difference",0,64,1,16],
+  ["filterSpeckle","Speckle filter",0,32,1,4],
+  ["cornerThreshold","Corner threshold °",0,180,5,60],
+  ["lengthThreshold","Segment length",3.5,10,0.5,4],
+  ["spliceThreshold","Splice threshold °",0,180,5,45],
+  ["threshold","B&W threshold",0,255,1,128],
+];
+const PRESETS = {
+  photo:{maxdim:1536,smooth:2,colorPrecision:8,layerDifference:8,filterSpeckle:4,cornerThreshold:180,lengthThreshold:4,spliceThreshold:45,stacked:true,spline:true,binary:false},
+  illustration:{maxdim:2048,smooth:1,colorPrecision:6,layerDifference:16,filterSpeckle:4,cornerThreshold:60,lengthThreshold:4,spliceThreshold:45,stacked:true,spline:true,binary:false},
+  lineart:{maxdim:2048,smooth:0,colorPrecision:6,layerDifference:16,filterSpeckle:2,cornerThreshold:60,lengthThreshold:4,spliceThreshold:45,stacked:false,spline:true,binary:true},
+  pixel:{maxdim:1024,smooth:0,colorPrecision:8,layerDifference:0,filterSpeckle:0,cornerThreshold:0,lengthThreshold:3.5,spliceThreshold:0,stacked:false,spline:false,binary:false},
+};
+const state = {binary:false};
+for (const [k,l,min,max,step,v] of CTL) {
+  $("#ctl").insertAdjacentHTML("beforeend",
+    `<label for="${k}">${l}<b id="${k}v">${v}</b></label><input type="range" id="${k}" min="${min}" max="${max}" step="${step}" value="${v}">`);
+}
+function applyPreset(n){
+  const p = PRESETS[n];
+  for (const [k] of CTL) if (k in p) { $("#"+k).value = p[k]; $("#"+k+"v").textContent = p[k]; }
+  $("#stacked").checked = p.stacked; $("#spline").checked = p.spline; state.binary = p.binary;
+  schedule();
+}
+$("#preset").onchange = e => applyPreset(e.target.value);
+
+const worker = new Worker("./worker.js", {type:"module"});
+let bitmap = null, reqId = 0, svgText = "", srcName = "image", timer = 0, fileBytes = 0;
+
+worker.onmessage = ({data}) => {
+  if (data.id !== reqId) return;
+  if (data.error) { $("#stat").textContent = "Error: " + data.error; return; }
+  svgText = data.svg;
+  $("#svgwrap").innerHTML = svgText;
+  const svg = $("#svgwrap svg"); svg.removeAttribute("width"); svg.removeAttribute("height");
+  svg.style.cssText = "position:absolute;inset:0;width:100%;height:100%";
+  const paths = (svgText.match(/<path/g)||[]).length;
+  $("#stat").textContent = `${bitmap.w}×${bitmap.h} · ${paths} paths · ${(svgText.length/1024).toFixed(1)} KB SVG${fileBytes?` (source ${(fileBytes/1024).toFixed(1)} KB)`:""} · ${data.ms.toFixed(0)} ms`;
+  $("#dl").disabled = $("#cp").disabled = false;
+};
+
+function schedule(){ clearTimeout(timer); timer = setTimeout(run, 150); }
+function opts(){
+  const v = k => +$("#"+k).value;
+  return {binary:state.binary, stacked:$("#stacked").checked, spline:$("#spline").checked,
+    filter_speckle:v("filterSpeckle"), color_precision:v("colorPrecision"), layer_difference:v("layerDifference"),
+    corner_threshold:v("cornerThreshold"), length_threshold:v("lengthThreshold"), splice_threshold:v("spliceThreshold"),
+    max_iterations:10, path_precision:2, smooth:v("smooth"), threshold:v("threshold")};
+}
+function run(){
+  if (!bitmap) return;
+  const max = +$("#maxdim").value, s = Math.min(1, max / Math.max(bitmap.src.width, bitmap.src.height));
+  const w = Math.max(1, Math.round(bitmap.src.width*s)), h = Math.max(1, Math.round(bitmap.src.height*s));
+  const c = new OffscreenCanvas(w,h), x = c.getContext("2d",{willReadFrequently:true});
+  x.imageSmoothingQuality = "high"; x.drawImage(bitmap.src,0,0,w,h);
+  bitmap.w = w; bitmap.h = h;
+  const px = x.getImageData(0,0,w,h).data;
+  reqId++;
+  $("#stat").textContent = "Tracing…";
+  worker.postMessage({id:reqId, rgba:px.buffer, width:w, height:h, opts:opts()}, [px.buffer]);
+}
+document.querySelectorAll("input[type=range]").forEach(r => r.oninput = () => { $("#"+r.id+"v").textContent = r.value; schedule(); });
+$("#stacked").onchange = $("#spline").onchange = schedule;
+
+async function load(blob, name){
+  const src = await createImageBitmap(blob);
+  bitmap = {src};
+  fileBytes = blob.size; srcName = (name||"image").replace(/\.[^.]+$/,"");
+  $("#src").src = URL.createObjectURL(blob);
+  run();
+}
+$("#drop").onclick = () => $("#file").click();
+$("#file").onchange = e => e.target.files[0] && load(e.target.files[0], e.target.files[0].name);
+for (const t of ["dragover","dragenter"]) addEventListener(t, e => { e.preventDefault(); $("#drop").classList.add("over"); });
+for (const t of ["dragleave","drop"]) addEventListener(t, e => { e.preventDefault(); $("#drop").classList.remove("over"); });
+addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) load(f, f.name); });
+addEventListener("paste", e => { const f = [...e.clipboardData.files][0]; if (f) load(f, f.name); });
+$("#dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([svgText],{type:"image/svg+xml"})); a.download = srcName + ".svg"; a.click(); };
+$("#cp").onclick = () => navigator.clipboard.writeText(svgText);
+
+let drag = false;
+const setSplit = x => { const r = $("#view").getBoundingClientRect(), p = Math.min(100,Math.max(0,(x-r.left)/r.width*100)); $("#bar").style.left = p+"%"; $("#svgwrap").style.clipPath = `inset(0 0 0 ${p}%)`; };
+$("#bar").onpointerdown = e => { drag = true; e.target.setPointerCapture(e.pointerId); };
+$("#bar").onpointermove = e => drag && setSplit(e.clientX);
+$("#bar").onpointerup = () => drag = false;
+$("#view").onpointerdown = e => { if (e.target.id !== "bar") setSplit(e.clientX); };
+window.__victor = {load};
+</script>
+</body>
+</html>
