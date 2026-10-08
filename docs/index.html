@@ -42,6 +42,8 @@ button.p{background:var(--acc);color:#fff;border:0;margin-top:8px;cursor:pointer
   <div class="row"><label><input type="checkbox" id="stacked" checked> stacked layers</label><label><input type="checkbox" id="spline" checked> curves</label></div>
   <div class="row"><label><input type="checkbox" id="seg"> AI subject separation</label></div>
   <div class="row"><label><input type="checkbox" id="refine" checked> AI refinement</label></div>
+  <label>Refinement quality</label>
+  <select id="quality"><option value="fast">Fast</option><option value="balanced" selected>Balanced</option><option value="max">Max</option></select>
   <button class="p" id="dl" disabled>Download SVG</button>
   <button id="cp" disabled>Copy SVG</button>
 </aside>
@@ -109,6 +111,11 @@ async function run(){
   const token = ++runToken, t0 = performance.now();
   const max = +$("#maxdim").value, s = Math.min(1, max / Math.max(src.width, src.height));
   const w = Math.max(1, Math.round(src.width*s)), h = Math.max(1, Math.round(src.height*s));
+  const QUALITY = {
+    fast: { refineShapeIters: 6, refineIters: 60, refineMs: 1500, refineRounds: 2, refineDens: 0.06 },
+    balanced: {},
+    max: { refineShapeIters: 20, refineIters: 200, refineMs: 8000, refineRounds: 3, refinePrune: 0.3, refineDens: 0.25 }
+  };
   let params, note = "", traced = null;
   try {
     if (!manual() && $("#seg").checked) {
@@ -129,7 +136,7 @@ async function run(){
     if (!traced) {
       $("#stat").textContent = "Tracing…";
       const px = await toPixels(src, w, h);
-      traced = await trace(new Uint8Array(px.data), w, h, {...params, refine: $("#refine").checked});
+      traced = await trace(new Uint8Array(px.data), w, h, {...params, ...QUALITY[$("#quality").value], refine: $("#refine").checked});
     }
     const svg = traced;
     if (token !== runToken) return;
@@ -148,7 +155,7 @@ document.querySelectorAll("input[type=range]").forEach(r => r.oninput = () => {
   schedule();
 });
 $("#seg").onchange = schedule;
-$("#refine").onchange = schedule;
+$("#refine").onchange = $("#quality").onchange = schedule;
 $("#stacked").onchange = $("#spline").onchange = () => { if (!manual()) $("#preset").value = "detailed"; schedule(); };
 
 async function load(blob, name){

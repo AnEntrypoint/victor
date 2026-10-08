@@ -38,6 +38,7 @@ pub struct Options {
     pub refine_lr: f64,
     pub refine_cap: f64,
     pub refine_dead: f64,
+    pub refine_rounds: u32,
 }
 
 #[wasm_bindgen]
@@ -62,20 +63,21 @@ impl Options {
             gradient_gain: 0.35,
             refine: false,
             refine_iters: 120,
-            refine_ms: 2500.0,
+            refine_ms: 3000.0,
             refine_gradients: true,
             refine_solid: false,
             refine_gain: 400.0,
             refine_shape: true,
-            refine_shape_iters: 12,
+            refine_shape_iters: 8,
             refine_edge: 60.0,
-            refine_prune: 0.0,
-            refine_dens: 0.0,
+            refine_prune: 0.5,
+            refine_dens: 0.15,
             refine_precision: 1,
             refine_levels: 1,
             refine_lr: 0.2,
             refine_cap: 1.5,
             refine_dead: 0.5,
+            refine_rounds: 3,
         }
     }
 }

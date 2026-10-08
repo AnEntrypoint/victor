@@ -4,10 +4,11 @@ use wasm_bindgen::prelude::*;
 
 mod geom;
 mod paint;
+mod prune;
 mod raster;
 mod shape;
 
-use geom::{emit_d, parse, scaled};
+use geom::{emit_d, parse, scaled, Layer};
 use paint::{optimise_gradients, Grad};
 use raster::downscale;
 use shape::{colors, fields, optimise, stack_of, Settings};
@@ -44,36 +45,57 @@ fn dims(sw: usize, sh: usize, s: f32) -> (usize, usize) {
     (((sw as f32 * s).round() as usize).max(1), ((sh as f32 * s).round() as usize).max(1))
 }
 
-fn shape_stage(layers: &mut Vec<geom::Layer>, rgba: &[u8], sw: usize, sh: usize, o: &Options, deadline: f64) {
+fn sync(layers: &mut Vec<Layer>, work: &[Layer], s: f32, dead: f32) {
+    let mut back = scaled(work, 1.0 / s);
+    for (k, b) in back.iter_mut().enumerate() {
+        if let Some(l) = layers.get(k) {
+            b.src = l.src;
+            for (bs, ls) in b.subs.iter_mut().zip(l.subs.iter()) {
+                for (bp, lp) in bs.pts.iter_mut().zip(ls.pts.iter()) {
+                    if geom::dist(*bp, *lp) < dead {
+                        *bp = *lp;
+                    }
+                }
+            }
+        }
+    }
+    *layers = back;
+}
+
+fn shape_stage(layers: &mut Vec<Layer>, rgba: &[u8], sw: usize, sh: usize, o: &Options, deadline: f64) {
     let mut scales = level_scales(sw.max(sh) as f32);
     let keep = (o.refine_levels as usize).clamp(1, scales.len());
     scales = scales.split_off(scales.len() - keep);
     let weights: Vec<f32> = scales.iter().enumerate().map(|(i, _)| if i + 1 == scales.len() { 2.0 } else { 1.0 }).collect();
     let total: f32 = weights.iter().sum();
     let f = fields(rgba, sw, sh);
+    let prec = o.refine_precision.max(1);
+    let dead = o.refine_dead as f32;
+    let mut cfg = Settings { lambda: o.refine_edge as f32, lr: o.refine_lr as f32, cap: o.refine_cap as f32, solid: o.refine_solid, grow_from: usize::MAX };
+    let sf = *scales.last().unwrap();
+    let (wf, hf) = dims(sw, sh, sf);
+    let target_f = downscale(rgba, sw, sh, wf, hf);
+    let mult = if o.refine_prune > 0.0 { o.refine_prune as f32 } else { 1.0 };
+    if o.refine_prune > 0.0 {
+        prune::prune(layers, sf, &target_f, wf, hf, &f, mult, prec, o.refine_rounds as usize, deadline);
+    }
+    if o.refine_dens > 0.0 && now() < deadline {
+        let n0 = layers.len();
+        let max = ((n0 as f32 * o.refine_dens as f32).ceil() as usize).clamp(1, 600);
+        if prune::spawn(layers, sf, &target_f, wf, hf, max, mult, prec) > 0 {
+            cfg.grow_from = n0;
+        }
+    }
     for (i, &s) in scales.iter().enumerate() {
         if now() > deadline {
-            break;
+            return;
         }
         let iters = ((o.refine_shape_iters as f32 * weights[i] / total).round() as usize).max(2);
         let (w, h) = dims(sw, sh, s);
         let target = downscale(rgba, sw, sh, w, h);
         let mut work = scaled(layers, s);
-        let cfg = Settings { lambda: o.refine_edge as f32, lr: o.refine_lr as f32, cap: o.refine_cap as f32, solid: o.refine_solid };
         optimise(&mut work, &target, w, h, &f, s, iters, &cfg, deadline);
-        let mut back = scaled(&work, 1.0 / s);
-        for (b, l) in back.iter_mut().zip(layers.iter()) {
-            b.off = l.off;
-            b.src = l.src;
-            for (bs, ls) in b.subs.iter_mut().zip(l.subs.iter()) {
-                for (bp, lp) in bs.pts.iter_mut().zip(ls.pts.iter()) {
-                    if geom::dist(*bp, *lp) < o.refine_dead as f32 {
-                        *bp = *lp;
-                    }
-                }
-            }
-        }
-        *layers = back;
+        sync(layers, &work, s, dead);
     }
 }
 

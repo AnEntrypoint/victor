@@ -3,14 +3,16 @@ use super::now;
 use super::paint::render;
 use super::raster::{build_stack, Stack, NONE};
 
-const OFFS: [(f32, f32); 5] = [(-1.0, 0.25), (-0.5, 0.5), (0.0, 1.0), (0.5, 0.5), (1.0, 0.25)];
-const OFFS_SUM: f32 = 2.5;
+const OFFS: [(f32, f32); 3] = [(-0.75, 0.5), (0.0, 1.0), (0.75, 0.5)];
+const OFFS_SUM: f32 = 2.0;
 const REACH: f32 = 1.5;
+const SPACING: f32 = 1.5;
 const WEAK_EDGE: f32 = 9.0;
 const ADAM_EPS: f32 = 20.0;
+const PLATEAU: f32 = 0.002;
 
-pub struct Fields<'a> {
-    pub rgba: &'a [u8],
+pub struct Fields {
+    pub rgb: Vec<u8>,
     pub sw: usize,
     pub sh: usize,
     pub e: Vec<f32>,
@@ -19,21 +21,22 @@ pub struct Fields<'a> {
 pub struct Ctx<'a> {
     pub st: &'a Stack,
     pub pred: &'a [f32],
-    pub f: &'a Fields<'a>,
+    pub f: &'a Fields,
     pub s: f32,
     pub lambda: f32,
 }
 
 pub type Grid = Vec<Vec<Vec<[f32; 2]>>>;
 
-pub fn fields(rgba: &[u8], sw: usize, sh: usize) -> Fields<'_> {
-    let luma: Vec<f32> = (0..sw * sh)
-        .map(|i| {
-            let al = rgba[i * 4 + 3] as f32 / 255.0;
-            let c = |q: usize| rgba[i * 4 + q] as f32 * al + 255.0 * (1.0 - al);
-            0.299 * c(0) + 0.587 * c(1) + 0.114 * c(2)
-        })
-        .collect();
+pub fn fields(rgba: &[u8], sw: usize, sh: usize) -> Fields {
+    let mut rgb = vec![255u8; sw * sh * 3];
+    for i in 0..sw * sh {
+        let al = rgba[i * 4 + 3] as f32 / 255.0;
+        for c in 0..3 {
+            rgb[i * 3 + c] = (rgba[i * 4 + c] as f32 * al + 255.0 * (1.0 - al)).round() as u8;
+        }
+    }
+    let luma: Vec<f32> = (0..sw * sh).map(|i| 0.299 * rgb[i * 3] as f32 + 0.587 * rgb[i * 3 + 1] as f32 + 0.114 * rgb[i * 3 + 2] as f32).collect();
     let at = |x: i32, y: i32| luma[y.clamp(0, sh as i32 - 1) as usize * sw + x.clamp(0, sw as i32 - 1) as usize];
     let mut e = vec![0f32; sw * sh];
     for y in 0..sh {
@@ -44,7 +47,7 @@ pub fn fields(rgba: &[u8], sw: usize, sh: usize) -> Fields<'_> {
             e[y * sw + x] = (gx * gx + gy * gy).sqrt();
         }
     }
-    Fields { rgba, sw, sh, e }
+    Fields { rgb, sw, sh, e }
 }
 
 fn hi_rgb(f: &Fields, x: f32, y: f32) -> [f32; 3] {
@@ -53,11 +56,7 @@ fn hi_rgb(f: &Fields, x: f32, y: f32) -> [f32; 3] {
     let (x0, y0) = (fx as usize, fy as usize);
     let (x1, y1) = ((x0 + 1).min(f.sw - 1), (y0 + 1).min(f.sh - 1));
     let (tx, ty) = (fx - x0 as f32, fy - y0 as f32);
-    let px = |xx: usize, yy: usize, c: usize| {
-        let i = (yy * f.sw + xx) * 4;
-        let al = f.rgba[i + 3] as f32 / 255.0;
-        f.rgba[i + c] as f32 * al + 255.0 * (1.0 - al)
-    };
+    let px = |xx: usize, yy: usize, c: usize| f.rgb[(yy * f.sw + xx) * 3 + c] as f32;
     let mut o = [0f32; 3];
     for c in 0..3 {
         let a = px(x0, y0, c) * (1.0 - tx) + px(x1, y0, c) * tx;
@@ -106,7 +105,7 @@ pub fn boundary(l: &Layer, k: u32, cx: &Ctx, mut g: Option<&mut Grid>, li: usize
                 (sub.pts[idx], sub.pts[idx + 1], sub.pts[idx + 2], sub.pts[idx + 3], [idx, idx + 1, idx + 2, idx + 3], 3)
             };
             idx += adv;
-            let m = ((dist(a, b) + dist(b, c) + dist(c, d)).ceil() as usize).clamp(2, 40);
+            let m = (((dist(a, b) + dist(b, c) + dist(c, d)) / SPACING).ceil() as usize).clamp(2, 40);
             for j in 0..m {
                 let t = (j as f32 + 0.5) / m as f32;
                 let u = 1.0 - t;
@@ -198,11 +197,13 @@ fn point_scale(layers: &[Layer]) -> Vec<Vec<Vec<f32>>> {
         .collect()
 }
 
+#[derive(Clone, Copy)]
 pub struct Settings {
     pub lambda: f32,
     pub lr: f32,
     pub cap: f32,
     pub solid: bool,
+    pub grow_from: usize,
 }
 
 pub fn colors(layers: &[Layer]) -> Vec<[f32; 3]> {
@@ -229,6 +230,8 @@ pub fn optimise(work: &mut Vec<Layer>, target: &[f32], w: usize, h: usize, f: &F
     let mut best_layers = work.clone();
     let mut lr_scale = 1.0f32;
     let mut taken = 0f32;
+    let mut flat = 0;
+    let mut prev = f32::MAX;
     for it in 0..=iters {
         let st = stack_of(work, w, h);
         let mut solid = colors(work);
@@ -242,6 +245,19 @@ pub fn optimise(work: &mut Vec<Layer>, target: &[f32], w: usize, h: usize, f: &F
             pred = render(&st, &solid, &none);
         }
         let loss = loss_of(target, &pred);
+        if prev - loss < PLATEAU * prev {
+            flat += 1;
+        } else {
+            flat = 0;
+        }
+        prev = loss;
+        if flat >= 2 {
+            if loss < best {
+                best = loss;
+                best_layers.clone_from(work);
+            }
+            break;
+        }
         if loss < best {
             best = loss;
             best_layers.clone_from(work);
@@ -284,7 +300,8 @@ pub fn optimise(work: &mut Vec<Layer>, target: &[f32], w: usize, h: usize, f: &F
                         let s0 = start[k].subs[si].pts[i];
                         let (cur, orig) = if d == 0 { (sub.pts[i].0, s0.0) } else { (sub.pts[i].1, s0.1) };
                         let lim = if d == 0 { w as f32 } else { h as f32 };
-                        let nv = (cur - step).clamp(orig - cfg.cap, orig + cfg.cap).clamp(-4.0, lim + 4.0);
+                        let cap = if k >= cfg.grow_from { cfg.cap * 4.0 } else { cfg.cap };
+                        let nv = (cur - step).clamp(orig - cap, orig + cap).clamp(-4.0, lim + 4.0);
                         if d == 0 {
                             sub.pts[i].0 = nv;
                         } else {

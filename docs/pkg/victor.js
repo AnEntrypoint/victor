@@ -166,6 +166,13 @@ export class Options {
     /**
      * @returns {number}
      */
+    get refine_rounds() {
+        const ret = wasm.__wbg_get_options_refine_rounds(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @returns {number}
+     */
     get refine_shape_iters() {
         const ret = wasm.__wbg_get_options_refine_shape_iters(this.__wbg_ptr);
         return ret >>> 0;
@@ -363,6 +370,12 @@ export class Options {
      */
     set refine_prune(arg0) {
         wasm.__wbg_set_options_refine_prune(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set refine_rounds(arg0) {
+        wasm.__wbg_set_options_refine_rounds(this.__wbg_ptr, arg0);
     }
     /**
      * @param {number} arg0

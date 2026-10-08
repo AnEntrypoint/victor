@@ -9,7 +9,7 @@ const FIELDS = {
   smooth: "smooth", threshold: "threshold", gradients: "gradients", gradientGain: "gradient_gain",
   refine: "refine", refineIters: "refine_iters", refineMs: "refine_ms", refineGradients: "refine_gradients", refineSolid: "refine_solid", refineGain: "refine_gain",
   refineShape: "refine_shape", refineShapeIters: "refine_shape_iters", refineEdge: "refine_edge", refinePrune: "refine_prune", refineDens: "refine_dens",
-  refinePrecision: "refine_precision", refineLevels: "refine_levels", refineLr: "refine_lr", refineCap: "refine_cap", refineDead: "refine_dead"
+  refinePrecision: "refine_precision", refineLevels: "refine_levels", refineLr: "refine_lr", refineCap: "refine_cap", refineDead: "refine_dead", refineRounds: "refine_rounds"
 };
 
 self.onmessage = async ({ data }) => {

@@ -8,7 +8,7 @@ const FIELDS = {
   lengthThreshold: "length_threshold", spliceThreshold: "splice_threshold", pathPrecision: "path_precision",
   smooth: "smooth", threshold: "threshold", gradients: "gradients", gradientGain: "gradient_gain",
   refine: "refine", refineIters: "refine_iters", refineMs: "refine_ms", refineGradients: "refine_gradients", refineSolid: "refine_solid", refineGain: "refine_gain",
-  refineShape: "refine_shape", refineShapeIters: "refine_shape_iters", refineEdge: "refine_edge", refineLevels: "refine_levels", refineLr: "refine_lr", refineCap: "refine_cap", refineDead: "refine_dead", refinePrune: "refine_prune", refineDens: "refine_dens", refinePrecision: "refine_precision"
+  refineShape: "refine_shape", refineShapeIters: "refine_shape_iters", refineEdge: "refine_edge", refineLevels: "refine_levels", refineLr: "refine_lr", refineCap: "refine_cap", refineDead: "refine_dead", refineRounds: "refine_rounds", refinePrune: "refine_prune", refineDens: "refine_dens", refinePrecision: "refine_precision"
 };
 
 function options(params) {
@@ -69,9 +69,8 @@ const H = { ...Q, ...C, refineEdge: 60, refineDead: 0.3 };
 const B5 = { ...Q, refinePrecision: 1, refineEdge: 60, refineDead: 0.5, refineCap: 1.5, refineLr: 0.2 };
 export default {
   auto: variant(null),
-  phase1: variant({ refineGradients: true, refineShape: false, refinePrecision: 0 }),
-  c1g: variant({ refineGradients: true, refineShape: false, refinePrecision: 1 }),
-  b5: variant({ ...B5, refineGradients: false }),
-  b5g: variant({ ...B5, refineGradients: true, refineMs: 2500 }),
-  b5g35: variant({ ...B5, refineGradients: true, refineMs: 3500 })
+  phase1: variant({ refineGradients: true, refineShape: false, refinePrecision: 0, refinePrune: 0, refineDens: 0, refineMs: 1500 }),
+  fast: variant({ refineShapeIters: 6, refineIters: 60, refineMs: 1500, refineRounds: 2, refineDens: 0.06 }),
+  balanced: variant({}),
+  max: variant({ refineShapeIters: 20, refineIters: 200, refineMs: 8000, refineRounds: 3, refinePrune: 0.3, refineDens: 0.25 })
 };

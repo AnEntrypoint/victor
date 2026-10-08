@@ -4,6 +4,7 @@ use crate::fit_gradient;
 
 pub const MIN_AREA: f32 = 80.0;
 pub const INTERIOR: f32 = 0.8;
+const PLATEAU: f32 = 0.001;
 
 #[derive(Clone, Copy)]
 pub struct Grad {
@@ -134,6 +135,8 @@ pub fn optimise_gradients(st: &Stack, target: &[f32], solid: &[[f32; 3]], target
     let mut adam: Vec<Adam> = cands.iter().map(|_| Adam { m: [0.0; 10], v: [0.0; 10] }).collect();
     let (b1, b2) = (0.9f32, 0.999f32);
     let mut pred = fixed.clone();
+    let mut prev_loss = f32::MAX;
+    let mut flat = 0;
     for it in 0..iters {
         if now() > deadline {
             break;
@@ -149,6 +152,27 @@ pub fn optimise_gradients(st: &Stack, target: &[f32], solid: &[[f32; 3]], target
                     pred[pi * 3 + c] += wt * col[c];
                 }
             }
+        }
+        let mut loss = 0f32;
+        for &k in &cands {
+            let (s, e) = st.ranges[k];
+            for &(p, wt) in &st.entries[s..e] {
+                if wt >= INTERIOR {
+                    for c in 0..3 {
+                        let r = target[p as usize * 3 + c] - pred[p as usize * 3 + c];
+                        loss += r * r;
+                    }
+                }
+            }
+        }
+        if prev_loss - loss < PLATEAU * prev_loss {
+            flat += 1;
+        } else {
+            flat = 0;
+        }
+        prev_loss = loss;
+        if flat >= 3 {
+            break;
         }
         let decay = 0.5 * (1.0 + (std::f32::consts::PI * it as f32 / iters as f32).cos());
         let lr = 0.1 + 0.9 * decay;
